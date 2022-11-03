@@ -1,0 +1,2 @@
+# MatSim_FightingPopulations_Lanchester
+Mathematik und Simulation Seminarprojekt

@@ -32,7 +32,7 @@ public class Lanchester extends Animation {
 
 	private static void createGraphFrame(ApplicationTime thread) {
 		JFrame graphFrame = new JFrame("Mathematik und Simulation: Graphen der Funktionen G(t) und H(t)");
-		graphFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		graphFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
 		JPanel panel = new JPanel();
 
@@ -61,13 +61,14 @@ class LanchesterPanel extends JPanel {
 
 	int width = Constants.WINDOW_WIDTH;
 	int height = Constants.WINDOW_HEIGHT;
-	double startX = 500;
+	int halfWidth = width/2;
+	double startX = 600;
 	double startY = 300;
 	double vX = 5;
 	double vY = 5;
 	double currentX = startX;
 	double currentY = startY;
-	int diameter = 50;
+	int diameter = 10;
 
 	// drawing operations should be done in this method
 	@Override
@@ -77,21 +78,29 @@ class LanchesterPanel extends JPanel {
 		time = t.getTimeInSeconds();
 
 		g.setColor(Color.LIGHT_GRAY);
-		g.fillRect(0, 0, Constants.WINDOW_WIDTH, Constants.WINDOW_HEIGHT);
+		g.fillRect(0, 0, width, height);
 
-		double deltaTime = 0.0;
-		double lastFrameTime = 0.0;
-		deltaTime = time - lastFrameTime;
-		lastFrameTime = time;
-		currentX += (vX * deltaTime);
-		currentY += (vY * deltaTime);
+		currentX += vX;
+		currentY += vY;
 
-		if (currentX > Constants.WINDOW_WIDTH - diameter || currentX < 0) {
-			System.out.println("Object has hit the a side wall.");
-			vX *= -1;
+		g.setColor(Color.BLUE);
+		g.drawRect(1, 0, width/2-2, height-1);
+		g.setColor(Color.RED);
+		g.drawRect(width/2+1, 0, width/2-2, height-1);
+		g.setColor(Color.BLACK);
+		g.drawLine(width/2, 0, width/2, height);
+
+		if(currentX < halfWidth) {
+			if (currentX > halfWidth - diameter || currentX < 0) {
+				vX *= -1;
+			}
 		}
-		if (currentY < 0 || currentY > Constants.WINDOW_HEIGHT - diameter) {
-			System.out.println("Object has hit the ceiling or floor.");
+		if(currentX > halfWidth) {
+			if (currentX > width - diameter || currentX < halfWidth) {
+				vX *= -1;
+			}
+		}
+		if (currentY < 0 || currentY > height - diameter) {
 			vY *= -1;
 		}
 

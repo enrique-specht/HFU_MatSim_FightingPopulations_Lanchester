@@ -26,7 +26,19 @@ public class Lanchester extends Animation {
 		frame.setVisible(true);
 
 		frames.add(frame);
+		createGraphFrame(applicationTimeThread);
 		return frames;
+	}
+
+	private static void createGraphFrame(ApplicationTime thread) {
+		JFrame graphFrame = new JFrame("Mathematik und Simulation: Graphen der Funktionen G(t) und H(t)");
+		graphFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
+		JPanel panel = new JPanel();
+
+		graphFrame.add(panel);
+		graphFrame.setVisible(true);
+		graphFrame.pack();
 	}
 
 }

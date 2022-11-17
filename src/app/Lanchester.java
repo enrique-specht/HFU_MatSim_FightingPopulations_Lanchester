@@ -1,12 +1,9 @@
 package app;
 
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Graphics;
+import java.awt.*;
 import java.util.ArrayList;
 
-import javax.swing.JFrame;
-import javax.swing.JPanel;
+import javax.swing.*;
 
 import utils.ApplicationTime;
 
@@ -26,7 +23,10 @@ public class Lanchester extends Animation {
 		frame.setVisible(true);
 
 		frames.add(frame);
+
+		createStartFrame(applicationTimeThread);
 		createGraphFrame(applicationTimeThread);
+
 		return frames;
 	}
 
@@ -34,13 +34,62 @@ public class Lanchester extends Animation {
 		JFrame graphFrame = new JFrame("Mathematik und Simulation: Graphen der Funktionen G(t) und H(t)");
 		graphFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
-		JPanel panel = new JPanel();
+		JPanel graphPanel = new JPanel();
 
-		graphFrame.add(panel);
+		graphFrame.add(graphPanel);
 		graphFrame.setVisible(true);
 		graphFrame.pack();
 	}
 
+	private static void createStartFrame(ApplicationTime thread) {
+		JFrame startFrame = new JFrame("Mathematik und Simulation: Lanchester Starteigenschaften");
+		startFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+		startFrame.setLayout(new GridLayout(1, 4, 10, 0));
+
+		JPanel startPanel = new JPanel();
+		startPanel.setLayout(new GridLayout(7, 2, 10, 0));
+
+		int intMinimum = 0;
+		int intMaximum = 1000;
+		int textFieldSize = 20;
+
+		JLabel g0Label = new JLabel("Populationsstärke G0:");
+		startPanel.add(g0Label);
+		JLabel h0Label = new JLabel("Populationsstärke H0:");
+		startPanel.add(h0Label);
+		JSlider g0Slider = new JSlider(intMinimum, intMaximum);
+		startPanel.add(g0Slider);
+		JSlider h0Slider = new JSlider(intMinimum, intMaximum);
+		startPanel.add(h0Slider);
+		JTextField g0Input = new JTextField(textFieldSize);
+		startPanel.add(g0Input);
+		JTextField h0Input = new JTextField(textFieldSize);
+		startPanel.add(h0Input);
+
+		JLabel rLabel = new JLabel("r:");
+		startPanel.add(rLabel);
+		JLabel sLabel = new JLabel("s:");
+		startPanel.add(sLabel);
+		JSlider rSlider = new JSlider(intMinimum, intMaximum);
+		startPanel.add(rSlider);
+		JSlider sSlider = new JSlider(intMinimum, intMaximum);
+		startPanel.add(sSlider);
+		JTextField rInput = new JTextField(textFieldSize);
+		startPanel.add(rInput);
+		JTextField sInput = new JTextField(textFieldSize);
+		startPanel.add(sInput);
+		JButton startButton = new JButton("Starten");
+		startPanel.add(startButton);
+
+		startFrame.add(startPanel);
+		startFrame.setVisible(true);
+		startFrame.pack();
+	}
+
+	public int G0;
+	public int H0;
+	public int r;
+	public int s;
 }
 
 class LanchesterPanel extends JPanel {

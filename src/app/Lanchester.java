@@ -73,38 +73,38 @@ public class Lanchester extends Animation {
 		startPanel.add(h0Input);
 
 		//sliders and inputs for r and s
-		JLabel rLabel = new JLabel("r:");
-		startPanel.add(rLabel);
 		JLabel sLabel = new JLabel("s:");
 		startPanel.add(sLabel);
-		JSlider rSlider = new JSlider(intMinimum, intMaximum);
-		startPanel.add(rSlider);
+		JLabel rLabel = new JLabel("r:");
+		startPanel.add(rLabel);
 		JSlider sSlider = new JSlider(intMinimum, intMaximum);
 		startPanel.add(sSlider);
-		JTextField rInput = new JTextField(textFieldSize);
-		startPanel.add(rInput);
+		JSlider rSlider = new JSlider(intMinimum, intMaximum);
+		startPanel.add(rSlider);
 		JTextField sInput = new JTextField(textFieldSize);
 		startPanel.add(sInput);
+		JTextField rInput = new JTextField(textFieldSize);
+		startPanel.add(rInput);
 		JButton startButton = new JButton("Starten");
 		startPanel.add(startButton);
 
 		g0Input.setText(""+g0Slider.getValue());
 		h0Input.setText(""+h0Slider.getValue());
-		rInput.setText(""+ (double) rSlider.getValue()/100);
 		sInput.setText(""+ (double) sSlider.getValue()/100);
+		rInput.setText(""+ (double) rSlider.getValue()/100);
 
 		//set sliders and inputs
 		JSlider[] allSliders = new JSlider[4];
 		allSliders[0] = g0Slider;
 		allSliders[1] = h0Slider;
-		allSliders[2] = rSlider;
-		allSliders[3] = sSlider;
+		allSliders[2] = sSlider;
+		allSliders[3] = rSlider;
 
 		JTextField[] allInputs = new JTextField[4];
 		allInputs[0] = g0Input;
 		allInputs[1] = h0Input;
-		allInputs[2] = rInput;
-		allInputs[3] = sInput;
+		allInputs[2] = sInput;
+		allInputs[3] = rInput;
 
 		//Sync Sliders with Textfield
 		for (JSlider slider : allSliders) {
@@ -126,17 +126,22 @@ public class Lanchester extends Animation {
 				public void keyReleased(KeyEvent e) {
 					int i = Arrays.asList(allInputs).indexOf(input);
 					if (allInputs[i].getText() == null) {
-						allSliders[i].setValue(1);
+						allSliders[i].setValue(0);
 					}
 					try {
-						int x = Integer.parseInt(allInputs[i].getText());
+						double x = Double.parseDouble(allInputs[i].getText());
 						if (x > intMaximum || x < intMinimum) {
 							allInputs[i].setText("");
 						}
-						allSliders[i].setValue(Integer.parseInt(allInputs[i].getText()));
+						if(allInputs[i] == allInputs[2] || allInputs[i] == allInputs[3]) {
+							x=x*100;
+							allSliders[i].setValue((int)x);
+						} else {
+							allSliders[i].setValue((int)x);
+						}
 					} catch (NumberFormatException nfe) {
 						allInputs[i].setText("");
-						allSliders[i].setValue(1);
+						allSliders[i].setValue(0);
 					}
 
 				}
@@ -148,13 +153,13 @@ public class Lanchester extends Animation {
 			public void actionPerformed(ActionEvent e) {
 				G0 = allSliders[0].getValue();
 				H0 = allSliders[1].getValue();
-				r = (double) allSliders[2].getValue()/100;
-				s= (double) allSliders[3].getValue()/100;
+				s = (double) allSliders[2].getValue()/100;
+				r = (double) allSliders[3].getValue()/100;
 				startFrame.dispose();
 				frame.setVisible(true);
 				graphFrame.setVisible(true);
+				System.out.println("G0=" + G0 + " H0=" + H0 + " s=" + s + " r=" + r);
 				LanchesterPanel.initialization();
-				System.out.println("G0=" + G0 + " H0=" + H0 + " r=" + r + " s=" + s);
 			}
 		} );
 
@@ -163,16 +168,17 @@ public class Lanchester extends Animation {
 		startFrame.pack();
 	}
 
-	public static int G0;
-	public static int H0;
-	public static double r;
+	public static double G0;
+	public static double H0;
 	public static double s;
+	public static double r;
 }
 
 class LanchesterPanel extends JPanel {
 
 	private final ApplicationTime t;
 	private double time;
+	private double startDelay;
 
 	private static double[] g0vX;
 	private static double[] g0vY;
@@ -182,6 +188,10 @@ class LanchesterPanel extends JPanel {
 	private static double[] h0vY;
 	private static double[] h0currentX;
 	private static double[] h0currentY;
+	private static double currentG;
+	private static double currentH;
+	private static int currentGRounded;
+	private static int currentHRounded;
 
 	public LanchesterPanel(ApplicationTime thread) {
 		this.t = thread;
@@ -200,12 +210,12 @@ class LanchesterPanel extends JPanel {
 
 	public static void initialization() {
 		//G0 params
-		double[] g0startX = new double[Lanchester.G0];
-		double[] g0startY = new double[Lanchester.G0];
-		g0vX = new double[Lanchester.G0];
-		g0vY = new double[Lanchester.G0];
-		g0currentX = new double[Lanchester.G0];
-		g0currentY = new double[Lanchester.G0];
+		double[] g0startX = new double[(int)Lanchester.G0];
+		double[] g0startY = new double[(int)Lanchester.G0];
+		g0vX = new double[(int)Lanchester.G0];
+		g0vY = new double[(int)Lanchester.G0];
+		g0currentX = new double[(int)Lanchester.G0];
+		g0currentY = new double[(int)Lanchester.G0];
 
 		for (int i = 0; i < Lanchester.G0; i++) {
 
@@ -227,12 +237,12 @@ class LanchesterPanel extends JPanel {
 		}
 
 		//H0 params
-		double[] h0startX = new double[Lanchester.H0];
-		double[] h0startY = new double[Lanchester.H0];
-		h0vX = new double[Lanchester.H0];
-		h0vY = new double[Lanchester.H0];
-		h0currentX = new double[Lanchester.H0];
-		h0currentY = new double[Lanchester.H0];
+		double[] h0startX = new double[(int)Lanchester.H0];
+		double[] h0startY = new double[(int)Lanchester.H0];
+		h0vX = new double[(int)Lanchester.H0];
+		h0vY = new double[(int)Lanchester.H0];
+		h0currentX = new double[(int)Lanchester.H0];
+		h0currentY = new double[(int)Lanchester.H0];
 
 		for (int i = 0; i < Lanchester.H0; i++) {
 
@@ -252,6 +262,10 @@ class LanchesterPanel extends JPanel {
 			h0currentX[i] = h0startX[i];
 			h0currentY[i] = h0startY[i];
 		}
+		testWhoWillWin();
+
+		currentG = Lanchester.G0;
+		currentH = Lanchester.H0;
 	}
 	public static void lanchesterMath (double G0,double H0,double r,double s) {
 		int t = 0;
@@ -269,6 +283,58 @@ class LanchesterPanel extends JPanel {
 		}
 	}
 
+	public static void testWhoWillWin() {
+		double k = Math.sqrt(Lanchester.s * Lanchester.r);
+		double l = (Lanchester.s * Math.pow(Lanchester.G0, 2)) - (Lanchester.r * Math.pow(Lanchester.H0, 2));
+		if(l > 0) {
+			double tPlus = 1/k * aTanh((k*Lanchester.H0)/(Lanchester.s*Lanchester.G0));
+			System.out.println("G wird nach " + tPlus + "s gewinnen!");
+		}
+		if(l < 0) {
+			double tPlus = 1/k * aTanh((k*Lanchester.G0)/(Lanchester.r*Lanchester.H0));
+			System.out.println("H wird nach " + tPlus + "s gewinnen!");
+		}
+		if(l == 0) {
+			if(Lanchester.G0 == Lanchester.H0 && Lanchester.r == Lanchester.s) {
+				double tPlus = -(1/k) * Math.log(1/(2*Lanchester.H0));
+				System.out.println("Tragisches Unentschieden nach " + tPlus + "s !");
+			}
+			if(Lanchester.G0 > Lanchester.H0) {
+				double tPlus = -(1/k) * Math.log(1/(2*Lanchester.H0));
+				System.out.println("Pyrrhussieg für G nach " + tPlus +"s !");
+			}
+			if(Lanchester.G0 < Lanchester.H0) {
+				double tPlus = -(1/k) * Math.log(1/(2*Lanchester.G0));
+				System.out.println("Pyrrhussieg für H nach " + tPlus + "s !");
+			}
+		}
+	}
+
+	private static double aTanh(double x) {
+		return (Math.log(1 + x) - Math.log(1 - x)) / 2;
+	}
+
+	public void getCurrentGandH () {
+		double k = Math.sqrt(Lanchester.s * Lanchester.r);
+		//G(t) und H(t)
+		currentG = Lanchester.G0 * Math.cosh(k * time) - Math.sqrt(Lanchester.r / Lanchester.s) * Lanchester.H0 * Math.sinh(k * time);
+		currentH = Lanchester.H0 * Math.cosh(k * time) - Math.sqrt(Lanchester.s / Lanchester.r) * Lanchester.G0 * Math.sinh(k * time);
+		//Round to Int because Persons can't be divided
+		currentGRounded = (int) Math.round(currentG);
+		currentHRounded = (int) Math.round(currentH);
+
+		//Output for Testing
+		if(!t.isInterrupted())
+			System.out.println("Bei "+ time + "s - " + "G:" + currentGRounded + " vs H:" + currentHRounded);
+	}
+
+	public void testIfDefeated() {
+		if (currentG < 0.5 || currentH < 0.5) {
+			//Pause if defeated
+			t.endThread();
+		}
+	}
+
 	@Override
 	protected void paintComponent(Graphics g) {
 		//stop drawing if start parameter haven't been chosen yet
@@ -277,7 +343,16 @@ class LanchesterPanel extends JPanel {
 		}
 
 		super.paintComponent(g);
-		time = t.getTimeInSeconds();
+
+		if(startDelay == 0) {
+			startDelay = t.getTimeInSeconds();
+		}
+		time = t.getTimeInSeconds() - startDelay;
+
+		//Get G(t) and H(t)
+		getCurrentGandH();
+		//Test if someone was defeated
+		testIfDefeated();
 
 		//draw background
 		g.setColor(Color.LIGHT_GRAY);
@@ -300,8 +375,8 @@ class LanchesterPanel extends JPanel {
 		g.drawString("r = " + String.valueOf(Lanchester.r),textdistance,textdistance*4);
 		g.drawString("s = " + String.valueOf(Lanchester.s),textdistance,textdistance*5);
 
-		//draw G0 population
-		for (int i = 0; i < Lanchester.G0; i++) {
+		//draw G population
+		for (int i = 0; i < currentGRounded; i++) {
 
 			g0currentX[i] += g0vX[i];
 			g0currentY[i] += g0vY[i];
@@ -324,8 +399,8 @@ class LanchesterPanel extends JPanel {
 			g.fillOval((int) g0currentX[i], (int) g0currentY[i], diameter, diameter);
 
 		}
-		//draw H0 population
-		for (int i = 0; i < Lanchester.H0; i++) {
+		//draw H population
+		for (int i = 0; i < currentHRounded; i++) {
 
 			h0currentX[i] += h0vX[i];
 			h0currentY[i] += h0vY[i];

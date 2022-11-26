@@ -63,7 +63,7 @@ public class ApplicationTime extends Thread {
 		while(true) {
 			if(running.compareAndSet(running.get(), false))
 				this.interrupt(); //In case an interruptable method like Thread.sleep is being used
-				System.out.println("Application Time has been interrupted");
+				//System.out.println("Application Time has been interrupted");
 				return;
 		}
 	}

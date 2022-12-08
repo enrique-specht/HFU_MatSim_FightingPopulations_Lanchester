@@ -37,7 +37,7 @@ public class Lanchester extends Animation {
 		JFrame graphFrame = new JFrame("Mathematik und Simulation: Graphen der Funktionen G(t) und H(t)");
 		graphFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
-		JPanel graphPanel = new JPanel();
+		JPanel graphPanel = new GraphPanel(thread);
 
 		graphFrame.add(graphPanel);
 		graphFrame.setVisible(false);
@@ -192,6 +192,9 @@ class LanchesterPanel extends JPanel {
 	private static double currentH;
 	private static int currentGRounded;
 	private static int currentHRounded;
+	private static double tPlus;
+	private static String tPlusRounded;
+	private static String calculatedResult;
 
 	public LanchesterPanel(ApplicationTime thread) {
 		this.t = thread;
@@ -206,7 +209,7 @@ class LanchesterPanel extends JPanel {
 	static int height = Constants.WINDOW_HEIGHT;
 	static int halfWidth = width/2;
 	static int diameter = 10;
-	static double velocity = 4;
+	static double velocity = 2;
 
 	public static void initialization() {
 		//G0 params
@@ -267,45 +270,40 @@ class LanchesterPanel extends JPanel {
 		currentG = Lanchester.G0;
 		currentH = Lanchester.H0;
 	}
-	public static void lanchesterMath (double G0,double H0,double r,double s) {
-		int t = 0;
-		while (G0 >= 0.5 || H0 >= 0.5) {
-
-			double Gvont = 0;
-			double Hvont = 0;
-			if (G0 <= 0.5) {
-
-			}
-			double k = Math.sqrt(s * r);
-			Gvont = G0 * Math.cosh(k * t) - Math.sqrt(r / s) * H0 * Math.sinh(k * t);
-			Hvont = H0 * Math.cosh(k * t) - Math.sqrt(r / s) * G0 * Math.sinh(k * t);
-			t++;
-		}
-	}
 
 	public static void testWhoWillWin() {
 		double k = Math.sqrt(Lanchester.s * Lanchester.r);
 		double l = (Lanchester.s * Math.pow(Lanchester.G0, 2)) - (Lanchester.r * Math.pow(Lanchester.H0, 2));
 		if(l > 0) {
-			double tPlus = 1/k * aTanh((k*Lanchester.H0)/(Lanchester.s*Lanchester.G0));
-			System.out.println("G wird nach " + tPlus + "s gewinnen!");
+			tPlus = 1/k * aTanh((k*Lanchester.H0)/(Lanchester.s*Lanchester.G0));
+			tPlusRounded = String.format("%.2f",tPlus);
+			System.out.println("G wird nach " + tPlusRounded + "s gewinnen!");
+			calculatedResult = "G gewinnt!";
 		}
 		if(l < 0) {
-			double tPlus = 1/k * aTanh((k*Lanchester.G0)/(Lanchester.r*Lanchester.H0));
-			System.out.println("H wird nach " + tPlus + "s gewinnen!");
+			tPlus = 1/k * aTanh((k*Lanchester.G0)/(Lanchester.r*Lanchester.H0));
+			tPlusRounded = String.format("%.2f",tPlus);
+			System.out.println("H wird nach " + tPlusRounded + "s gewinnen!");
+			calculatedResult = "H gewinnt!";
 		}
 		if(l == 0) {
 			if(Lanchester.G0 == Lanchester.H0 && Lanchester.r == Lanchester.s) {
-				double tPlus = -(1/k) * Math.log(1/(2*Lanchester.H0));
-				System.out.println("Tragisches Unentschieden nach " + tPlus + "s !");
+				tPlus = -(1/k) * Math.log(1/(2*Lanchester.H0));
+				tPlusRounded = String.format("%.2f",tPlus);
+				System.out.println("Tragisches Unentschieden nach " + tPlusRounded + "s !");
+				calculatedResult = "Tragisches Unentschieden!";
 			}
 			if(Lanchester.G0 > Lanchester.H0) {
-				double tPlus = -(1/k) * Math.log(1/(2*Lanchester.H0));
-				System.out.println("Pyrrhussieg für G nach " + tPlus +"s !");
+				tPlus = -(1/k) * Math.log(1/(2*Lanchester.H0));
+				tPlusRounded = String.format("%.2f",tPlus);
+				System.out.println("Pyrrhussieg für G nach " + tPlusRounded +"s !");
+				calculatedResult = "Pyrrhussieg für G!";
 			}
 			if(Lanchester.G0 < Lanchester.H0) {
-				double tPlus = -(1/k) * Math.log(1/(2*Lanchester.G0));
-				System.out.println("Pyrrhussieg für H nach " + tPlus + "s !");
+				tPlus = -(1/k) * Math.log(1/(2*Lanchester.G0));
+				tPlusRounded = String.format("%.3f",tPlus);
+				System.out.println("Pyrrhussieg für H nach " + tPlusRounded + "s !");
+				calculatedResult = "Pyrrhussieg für H!";
 			}
 		}
 	}
@@ -325,7 +323,7 @@ class LanchesterPanel extends JPanel {
 
 		//Output for Testing
 		if(!t.isInterrupted())
-			System.out.println("Bei "+ time + "s - " + "G:" + currentGRounded + " vs H:" + currentHRounded);
+			System.out.println("Bei "+ String.format("%.3f",time) + "s - " + "G:" + currentGRounded + " vs H:" + currentHRounded);
 	}
 
 	public void testIfDefeated() {
@@ -374,6 +372,11 @@ class LanchesterPanel extends JPanel {
 		g.drawString("H0 = " + String.valueOf(Lanchester.H0),textdistance,textdistance*3);
 		g.drawString("r = " + String.valueOf(Lanchester.r),textdistance,textdistance*4);
 		g.drawString("s = " + String.valueOf(Lanchester.s),textdistance,textdistance*5);
+		//calculated results
+		g.drawString("Berechnete Ergebnisse:", textdistance, textdistance*7);
+		g.drawString(calculatedResult,textdistance,textdistance*8);
+		g.drawString("Nach: " + tPlusRounded + "s",textdistance,textdistance*9);
+
 
 		//draw G population
 		for (int i = 0; i < currentGRounded; i++) {
@@ -424,5 +427,27 @@ class LanchesterPanel extends JPanel {
 
 		}
 
+	}
+}
+
+class GraphPanel extends JPanel {
+
+	private final ApplicationTime t;
+	public GraphPanel(ApplicationTime thread) {
+		this.t = thread;
+	}
+	public Dimension getPreferredSize() {
+		return new Dimension(Constants.GRAPH_WINDOW_WIDTH, Constants.GRAPH_WINDOW_HEIGHT);
+	}
+	static int width = Constants.GRAPH_WINDOW_WIDTH;
+	static int height = Constants.GRAPH_WINDOW_HEIGHT;
+	static int padding = 20;
+
+	@Override
+	protected void paintComponent(Graphics g) {
+		super.paintComponent(g);
+
+		g.drawLine(padding,padding ,padding,height-padding);
+		g.drawLine(padding, height-padding,width-padding,height-padding);
 	}
 }

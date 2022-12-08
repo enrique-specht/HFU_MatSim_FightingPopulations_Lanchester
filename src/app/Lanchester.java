@@ -28,22 +28,21 @@ public class Lanchester extends Animation {
 
 		frames.add(frame);
 
-		createGraphFrame(applicationTimeThread, frame);
-
-		return frames;
-	}
-
-	private static void createGraphFrame(ApplicationTime thread, JFrame frame) {
+		// Create GraphFrame
 		JFrame graphFrame = new JFrame("Mathematik und Simulation: Graphen der Funktionen G(t) und H(t)");
 		graphFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
-		JPanel graphPanel = new GraphPanel(thread);
+		JPanel graphPanel = new GraphPanel(applicationTimeThread);
 
 		graphFrame.add(graphPanel);
 		graphFrame.setVisible(false);
 		graphFrame.pack();
 
-		createStartFrame(thread, frame, graphFrame);
+		frames.add(graphFrame);
+
+		createStartFrame(applicationTimeThread, frame, graphFrame);
+
+		return frames;
 	}
 
 	private static void createStartFrame(ApplicationTime thread, JFrame frame, JFrame graphFrame) {
@@ -177,7 +176,7 @@ public class Lanchester extends Animation {
 class LanchesterPanel extends JPanel {
 
 	private final ApplicationTime t;
-	private double time;
+	protected static double time;
 	private double startDelay;
 
 	private static double[] g0vX;
@@ -190,8 +189,8 @@ class LanchesterPanel extends JPanel {
 	private static double[] h0currentY;
 	private static double currentG;
 	private static double currentH;
-	private static int currentGRounded;
-	private static int currentHRounded;
+	protected static int currentGRounded;
+	protected static int currentHRounded;
 	private static double tPlus;
 	private static String tPlusRounded;
 	private static String calculatedResult;
@@ -306,6 +305,12 @@ class LanchesterPanel extends JPanel {
 				calculatedResult = "Pyrrhussieg für H!";
 			}
 		}
+		int totalTicks = (int)Math.ceil(tPlus*Constants.FPS*1.25);
+		GraphPanel.graphGX = new int[totalTicks];
+		GraphPanel.graphGY = new int[totalTicks];
+		GraphPanel.graphHX = new int[totalTicks];
+		GraphPanel.graphHY = new int[totalTicks];
+		System.out.println(GraphPanel.graphGX.length);
 	}
 
 	private static double aTanh(double x) {
@@ -357,9 +362,9 @@ class LanchesterPanel extends JPanel {
 		g.fillRect(0, 0, width, height);
 
 		//draw field
-		g.setColor(Color.BLUE);
-		g.drawRect(1, 0, width/2-2, height-1);
 		g.setColor(Color.RED);
+		g.drawRect(1, 0, width/2-2, height-1);
+		g.setColor(Color.BLUE);
 		g.drawRect(width/2+1, 0, width/2-2, height-1);
 		g.setColor(Color.BLACK);
 		g.drawLine(width/2, 0, width/2, height);
@@ -370,8 +375,8 @@ class LanchesterPanel extends JPanel {
 		g.drawString("Start Parameter:", textdistance, textdistance);
 		g.drawString("G0 = " + String.valueOf(Lanchester.G0),textdistance,textdistance*2);
 		g.drawString("H0 = " + String.valueOf(Lanchester.H0),textdistance,textdistance*3);
-		g.drawString("r = " + String.valueOf(Lanchester.r),textdistance,textdistance*4);
-		g.drawString("s = " + String.valueOf(Lanchester.s),textdistance,textdistance*5);
+		g.drawString("s = " + String.valueOf(Lanchester.s),textdistance,textdistance*4);
+		g.drawString("r = " + String.valueOf(Lanchester.r),textdistance,textdistance*5);
 		//calculated results
 		g.drawString("Berechnete Ergebnisse:", textdistance, textdistance*7);
 		g.drawString(calculatedResult,textdistance,textdistance*8);
@@ -398,7 +403,7 @@ class LanchesterPanel extends JPanel {
 				g0vY[i] *= -1;
 			}
 
-			g.setColor(Color.BLUE);
+			g.setColor(Color.RED);
 			g.fillOval((int) g0currentX[i], (int) g0currentY[i], diameter, diameter);
 
 		}
@@ -422,7 +427,7 @@ class LanchesterPanel extends JPanel {
 				h0vY[i] *= -1;
 			}
 
-			g.setColor(Color.RED);
+			g.setColor(Color.BLUE);
 			g.fillOval((int) h0currentX[i], (int) h0currentY[i], diameter, diameter);
 
 		}
@@ -442,12 +447,62 @@ class GraphPanel extends JPanel {
 	static int width = Constants.GRAPH_WINDOW_WIDTH;
 	static int height = Constants.GRAPH_WINDOW_HEIGHT;
 	static int padding = 20;
+	static int pointdiameter = 5;
+	public static int graphGX[];
+	public static int graphGY[];
+	public static int graphHX[];
+	public static int graphHY[];
+	private static int graphPosition;
 
 	@Override
 	protected void paintComponent(Graphics g) {
 		super.paintComponent(g);
 
-		g.drawLine(padding,padding ,padding,height-padding);
-		g.drawLine(padding, height-padding,width-padding,height-padding);
+		//Label coordinate system
+		g.drawString("Populationsstärke", padding*2, padding/2);
+		g.drawString("Zeit t", width-2*padding, height-padding/2);
+		g.setColor(Color.red);
+		g.drawString("G(t)",padding*7,padding/2);
+		g.setColor(Color.blue);
+		g.drawString("H(t)",padding*9,padding/2);
+		g.setColor(Color.BLACK);
+
+		int position = -pointdiameter/2;
+		int xLabel = 0;
+		while (position<=width) {
+			g.fillOval(position,height-pointdiameter,pointdiameter,pointdiameter);
+			g.drawString(String.valueOf(xLabel),position,height-padding/4);
+			position += 100;
+			xLabel +=1;
+		}
+		position = height-pointdiameter/2;
+		int yLabel = 0;
+		while (position>=0) {
+			g.fillOval(-pointdiameter/2,position,pointdiameter,pointdiameter);
+			g.drawString(String.valueOf(yLabel),0,position);
+			position -= 50;
+			yLabel += 100;
+		}
+
+		//Draw G(t) & H(t)
+		double time = LanchesterPanel.time*100;
+
+		int x = (int)time-pointdiameter/2;
+		int yG = Constants.GRAPH_WINDOW_HEIGHT-LanchesterPanel.currentGRounded/2-pointdiameter;
+		int yH = Constants.GRAPH_WINDOW_HEIGHT-LanchesterPanel.currentHRounded/2-pointdiameter;
+
+		if(graphPosition < graphGX.length) {
+			graphGX[graphPosition] = x;
+			graphGY[graphPosition] = yG;
+			graphHX[graphPosition] = x;
+			graphHY[graphPosition] = yH;
+			graphPosition++;
+		}
+		for (int i = 0; i < graphPosition; i++) {
+			g.setColor(Color.red);
+			g.fillOval(graphGX[i],graphGY[i],pointdiameter,pointdiameter);
+			g.setColor(Color.blue);
+			g.fillOval(graphHX[i],graphHY[i],pointdiameter,pointdiameter);
+		}
 	}
 }

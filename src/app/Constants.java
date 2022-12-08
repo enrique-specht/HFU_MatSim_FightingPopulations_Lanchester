@@ -3,8 +3,8 @@ package app;
 public class Constants {
 	public static int WINDOW_WIDTH = 1000;
 	public static int WINDOW_HEIGHT = 700;
-	public static int GRAPH_WINDOW_WIDTH = 1000;
-	public static int GRAPH_WINDOW_HEIGHT = 500;
+	public static int GRAPH_WINDOW_WIDTH = 1100;
+	public static int GRAPH_WINDOW_HEIGHT = 520;
 	
 	public static int FPS = 60;
 	public static int TPF = 1000/FPS;

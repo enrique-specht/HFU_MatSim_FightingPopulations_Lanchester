@@ -47,10 +47,10 @@ public class Lanchester extends Animation {
 	private static void createStartFrame(JFrame frame, JFrame graphFrame) {
 		JFrame startFrame = new JFrame("Mathematik und Simulation: Lanchester Starteigenschaften");
 		startFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		startFrame.setLayout(new GridLayout(1, 4, 10, 0));
+		startFrame.setLayout(new GridLayout(1, 4, 10, 10));
 
 		JPanel startPanel = new JPanel();
-		startPanel.setLayout(new GridLayout(7, 2, 10, 0));
+		startPanel.setLayout(new GridLayout(9, 2, 10, 10));
 
 		int populationMinimum = 0;
 		int populationMaximum = 1000;
@@ -59,9 +59,9 @@ public class Lanchester extends Animation {
 		int effectivityMaximum = 100;
 
 		//slider and inputs for G0 and H0
-		JLabel g0Label = new JLabel("Populationsstärke G0:");
+		JLabel g0Label = new JLabel("  Populationsstärke G0:");
 		startPanel.add(g0Label);
-		JLabel h0Label = new JLabel("Populationsstärke H0:");
+		JLabel h0Label = new JLabel("  Populationsstärke H0:");
 		startPanel.add(h0Label);
 		JSlider g0Slider = new JSlider(populationMinimum, populationMaximum);
 		startPanel.add(g0Slider);
@@ -73,9 +73,9 @@ public class Lanchester extends Animation {
 		startPanel.add(h0Input);
 
 		//sliders and inputs for r and s
-		JLabel sLabel = new JLabel("s:");
+		JLabel sLabel = new JLabel("  s:");
 		startPanel.add(sLabel);
-		JLabel rLabel = new JLabel("r:");
+		JLabel rLabel = new JLabel("  r:");
 		startPanel.add(rLabel);
 		JSlider sSlider = new JSlider(effectivityMinimum, effectivityMaximum);
 		startPanel.add(sSlider);
@@ -170,6 +170,46 @@ public class Lanchester extends Animation {
 			LanchesterPanel.initialization();
 		});
 
+		//Example Buttons
+		JLabel emptyLabel = new JLabel("");
+		startPanel.add(emptyLabel);
+
+		JButton exampleButton1 = new JButton("Bsp: H gewinnt");
+		startPanel.add(exampleButton1);
+		exampleButton1.addActionListener(e -> {
+			allSliders[0].setValue(400);
+			allSliders[1].setValue(300);
+			allSliders[2].setValue(13); // s=0.13
+			allSliders[3].setValue(25); // r=0.25
+		});
+
+		JButton exampleButton2 = new JButton("Bsp: G gewinnt");
+		startPanel.add(exampleButton2);
+		exampleButton2.addActionListener(e -> {
+			allSliders[0].setValue(75);
+			allSliders[1].setValue(50);
+			allSliders[2].setValue(20); // s=0.2
+			allSliders[3].setValue(40); // r=0.4
+		});
+
+		JButton exampleButton3 = new JButton("Bsp: Pyrrhussieg G");
+		startPanel.add(exampleButton3);
+		exampleButton3.addActionListener(e -> {
+			allSliders[0].setValue(100);
+			allSliders[1].setValue(50);
+			allSliders[2].setValue(20); // s=0.2
+			allSliders[3].setValue(80); // r=0.8
+		});
+
+		JButton exampleButton4 = new JButton("Bsp: Unentschieden");
+		startPanel.add(exampleButton4);
+		exampleButton4.addActionListener(e -> {
+			allSliders[0].setValue(400);
+			allSliders[1].setValue(400);
+			allSliders[2].setValue(70); // s=0.7
+			allSliders[3].setValue(70); // r=0.7
+		});
+
 		startFrame.add(startPanel);
 		startFrame.setVisible(true);
 		startFrame.pack();
@@ -202,6 +242,7 @@ class LanchesterPanel extends JPanel {
 	protected static double tPlus;
 	private static String tPlusRounded;
 	private static String calculatedResult;
+	protected static int winnerRestPopulation;
 
 	public LanchesterPanel(ApplicationTime thread) {
 		this.t = thread;
@@ -284,13 +325,17 @@ class LanchesterPanel extends JPanel {
 		if(l > 0) {
 			tPlus = 1/k * aTanh((k*Lanchester.H0)/(Lanchester.s*Lanchester.G0));
 			tPlusRounded = String.format("%.2f",tPlus);
-			System.out.println("G wird nach " + tPlusRounded + "s gewinnen!");
+			double gAtTPlus = Math.sqrt(l / Lanchester.s);
+			winnerRestPopulation = (int) Math.round(gAtTPlus);
+			System.out.println("G wird nach " + tPlusRounded + "s mit " + winnerRestPopulation + " übrigen Personen gewinnen!");
 			calculatedResult = "G gewinnt!";
 		}
 		if(l < 0) {
 			tPlus = 1/k * aTanh((k*Lanchester.G0)/(Lanchester.r*Lanchester.H0));
 			tPlusRounded = String.format("%.2f",tPlus);
-			System.out.println("H wird nach " + tPlusRounded + "s gewinnen!");
+			double hAtTPlus = Math.sqrt(-l / Lanchester.r);
+			winnerRestPopulation = (int) Math.round(hAtTPlus);
+			System.out.println("H wird nach " + tPlusRounded + "s mit " + winnerRestPopulation + " übrigen Personen gewinnen!");
 			calculatedResult = "H gewinnt!";
 		}
 		if(l == 0) {
@@ -303,13 +348,15 @@ class LanchesterPanel extends JPanel {
 			if(Lanchester.G0 > Lanchester.H0) {
 				tPlus = -(1/k) * Math.log(1/(2*Lanchester.H0));
 				tPlusRounded = String.format("%.2f",tPlus);
-				System.out.println("Pyrrhussieg für G nach " + tPlusRounded +"s !");
+				winnerRestPopulation = 1;
+				System.out.println("Pyrrhussieg für G nach " + tPlusRounded + "s!");
 				calculatedResult = "Pyrrhussieg für G!";
 			}
 			if(Lanchester.G0 < Lanchester.H0) {
 				tPlus = -(1/k) * Math.log(1/(2*Lanchester.G0));
 				tPlusRounded = String.format("%.3f",tPlus);
-				System.out.println("Pyrrhussieg für H nach " + tPlusRounded + "s !");
+				winnerRestPopulation = 1;
+				System.out.println("Pyrrhussieg für H nach " + tPlusRounded + "s!");
 				calculatedResult = "Pyrrhussieg für H!";
 			}
 		}
@@ -318,7 +365,6 @@ class LanchesterPanel extends JPanel {
 		GraphPanel.graphGY = new int[totalTicks];
 		GraphPanel.graphHX = new int[totalTicks];
 		GraphPanel.graphHY = new int[totalTicks];
-		System.out.println(GraphPanel.graphGX.length);
 	}
 
 	private static double aTanh(double x) {
@@ -360,10 +406,10 @@ class LanchesterPanel extends JPanel {
 		}
 		time = t.getTimeInSeconds() - startDelay;
 
-		//Get G(t) and H(t)
-		getCurrentGandH();
 		//Test if someone was defeated
 		testIfDefeated();
+		//Get G(t) and H(t)
+		getCurrentGandH();
 
 		//draw background
 		g.setColor(Color.LIGHT_GRAY);
@@ -389,6 +435,7 @@ class LanchesterPanel extends JPanel {
 		g.drawString("Berechnete Ergebnisse:", textdistance, textdistance*7);
 		g.drawString(calculatedResult,textdistance,textdistance*8);
 		g.drawString("Nach: " + tPlusRounded + "s",textdistance,textdistance*9);
+		g.drawString("Mit: " + winnerRestPopulation + " übrigen Person(en)",textdistance,textdistance*10);
 
 
 		//draw G population
@@ -464,7 +511,7 @@ class GraphPanel extends JPanel {
 	protected void paintComponent(Graphics g) {
 		super.paintComponent(g);
 
-		if(LanchesterPanel.tPlus > 10) {
+		if(LanchesterPanel.tPlus > 11) {
 			g.drawString("Die Zeit bis zu einem Sieg ist höher als 11s!", width/2, padding);
 			g.drawString("Graph kann eventuell nicht bis zum Ende gezeichnet werden!", width/2, padding*2);
 		}

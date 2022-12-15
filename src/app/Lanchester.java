@@ -7,7 +7,6 @@ import java.util.Arrays;
 import java.util.Random;
 
 import javax.swing.*;
-import javax.swing.event.*;
 
 import utils.ApplicationTime;
 
@@ -40,12 +39,12 @@ public class Lanchester extends Animation {
 
 		frames.add(graphFrame);
 
-		createStartFrame(applicationTimeThread, frame, graphFrame);
+		createStartFrame(frame, graphFrame);
 
 		return frames;
 	}
 
-	private static void createStartFrame(ApplicationTime thread, JFrame frame, JFrame graphFrame) {
+	private static void createStartFrame(JFrame frame, JFrame graphFrame) {
 		JFrame startFrame = new JFrame("Mathematik und Simulation: Lanchester Starteigenschaften");
 		startFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		startFrame.setLayout(new GridLayout(1, 4, 10, 0));
@@ -107,14 +106,12 @@ public class Lanchester extends Animation {
 
 		//Sync Sliders with Textfield
 		for (JSlider slider : allSliders) {
-			slider.addChangeListener(new ChangeListener() {
-				public void stateChanged(ChangeEvent e) {
-					int i = Arrays.asList(allSliders).indexOf(slider);
-					if(allInputs[i] == allInputs[2] || allInputs[i] == allInputs[3]) {
-						allInputs[i].setText("" + (double) allSliders[i].getValue()/100);
-					} else {
-						allInputs[i].setText("" + allSliders[i].getValue());
-					}
+			slider.addChangeListener(e -> {
+				int i = Arrays.asList(allSliders).indexOf(slider);
+				if(allInputs[i] == allInputs[2] || allInputs[i] == allInputs[3]) {
+					allInputs[i].setText("" + (double) allSliders[i].getValue()/100);
+				} else {
+					allInputs[i].setText("" + allSliders[i].getValue());
 				}
 			});
 		}
@@ -148,19 +145,17 @@ public class Lanchester extends Animation {
 		}
 
 		//start button
-		startButton.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				G0 = allSliders[0].getValue();
-				H0 = allSliders[1].getValue();
-				s = (double) allSliders[2].getValue()/100;
-				r = (double) allSliders[3].getValue()/100;
-				startFrame.dispose();
-				frame.setVisible(true);
-				graphFrame.setVisible(true);
-				System.out.println("G0=" + G0 + " H0=" + H0 + " s=" + s + " r=" + r);
-				LanchesterPanel.initialization();
-			}
-		} );
+		startButton.addActionListener(e -> {
+			G0 = allSliders[0].getValue();
+			H0 = allSliders[1].getValue();
+			s = (double) allSliders[2].getValue()/100;
+			r = (double) allSliders[3].getValue()/100;
+			startFrame.dispose();
+			frame.setVisible(true);
+			graphFrame.setVisible(true);
+			System.out.println("G0=" + G0 + " H0=" + H0 + " s=" + s + " r=" + r);
+			LanchesterPanel.initialization();
+		});
 
 		startFrame.add(startPanel);
 		startFrame.setVisible(true);
@@ -373,10 +368,10 @@ class LanchesterPanel extends JPanel {
 		g.setColor(Color.BLACK);
 		int textdistance = 25;
 		g.drawString("Start Parameter:", textdistance, textdistance);
-		g.drawString("G0 = " + String.valueOf(Lanchester.G0),textdistance,textdistance*2);
-		g.drawString("H0 = " + String.valueOf(Lanchester.H0),textdistance,textdistance*3);
-		g.drawString("s = " + String.valueOf(Lanchester.s),textdistance,textdistance*4);
-		g.drawString("r = " + String.valueOf(Lanchester.r),textdistance,textdistance*5);
+		g.drawString("G0 = " + Lanchester.G0,textdistance,textdistance*2);
+		g.drawString("H0 = " + Lanchester.H0,textdistance,textdistance*3);
+		g.drawString("s = " + Lanchester.s,textdistance,textdistance*4);
+		g.drawString("r = " + Lanchester.r,textdistance,textdistance*5);
 		//calculated results
 		g.drawString("Berechnete Ergebnisse:", textdistance, textdistance*7);
 		g.drawString(calculatedResult,textdistance,textdistance*8);
@@ -437,9 +432,7 @@ class LanchesterPanel extends JPanel {
 
 class GraphPanel extends JPanel {
 
-	private final ApplicationTime t;
 	public GraphPanel(ApplicationTime thread) {
-		this.t = thread;
 	}
 	public Dimension getPreferredSize() {
 		return new Dimension(Constants.GRAPH_WINDOW_WIDTH, Constants.GRAPH_WINDOW_HEIGHT);
@@ -448,10 +441,10 @@ class GraphPanel extends JPanel {
 	static int height = Constants.GRAPH_WINDOW_HEIGHT;
 	static int padding = 20;
 	static int pointdiameter = 5;
-	public static int graphGX[];
-	public static int graphGY[];
-	public static int graphHX[];
-	public static int graphHY[];
+	public static int[] graphGX;
+	public static int[] graphGY;
+	public static int[] graphHX;
+	public static int[] graphHY;
 	private static int graphPosition;
 
 	@Override

@@ -31,7 +31,7 @@ public class Lanchester extends Animation {
 		JFrame graphFrame = new JFrame("Mathematik und Simulation: Graphen der Funktionen G(t) und H(t)");
 		graphFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
-		JPanel graphPanel = new GraphPanel(applicationTimeThread);
+		JPanel graphPanel = new GraphPanel();
 
 		graphFrame.add(graphPanel);
 		graphFrame.setVisible(false);
@@ -52,18 +52,20 @@ public class Lanchester extends Animation {
 		JPanel startPanel = new JPanel();
 		startPanel.setLayout(new GridLayout(7, 2, 10, 0));
 
-		int intMinimum = 0;
-		int intMaximum = 1000;
+		int populationMinimum = 0;
+		int populationMaximum = 1000;
 		int textFieldSize = 20;
+		int effectivityMinimum = 0;
+		int effectivityMaximum = 100;
 
 		//slider and inputs for G0 and H0
 		JLabel g0Label = new JLabel("Populationsstärke G0:");
 		startPanel.add(g0Label);
 		JLabel h0Label = new JLabel("Populationsstärke H0:");
 		startPanel.add(h0Label);
-		JSlider g0Slider = new JSlider(intMinimum, intMaximum);
+		JSlider g0Slider = new JSlider(populationMinimum, populationMaximum);
 		startPanel.add(g0Slider);
-		JSlider h0Slider = new JSlider(intMinimum, intMaximum);
+		JSlider h0Slider = new JSlider(populationMinimum, populationMaximum);
 		startPanel.add(h0Slider);
 		JTextField g0Input = new JTextField(textFieldSize);
 		startPanel.add(g0Input);
@@ -75,9 +77,9 @@ public class Lanchester extends Animation {
 		startPanel.add(sLabel);
 		JLabel rLabel = new JLabel("r:");
 		startPanel.add(rLabel);
-		JSlider sSlider = new JSlider(intMinimum, intMaximum);
+		JSlider sSlider = new JSlider(effectivityMinimum, effectivityMaximum);
 		startPanel.add(sSlider);
-		JSlider rSlider = new JSlider(intMinimum, intMaximum);
+		JSlider rSlider = new JSlider(effectivityMinimum, effectivityMaximum);
 		startPanel.add(rSlider);
 		JTextField sInput = new JTextField(textFieldSize);
 		startPanel.add(sInput);
@@ -126,15 +128,26 @@ public class Lanchester extends Animation {
 					}
 					try {
 						double x = Double.parseDouble(allInputs[i].getText());
-						if (x > intMaximum || x < intMinimum) {
-							allInputs[i].setText("");
-						}
 						if(allInputs[i] == allInputs[2] || allInputs[i] == allInputs[3]) {
-							x=x*100;
+							if (x > (double)effectivityMaximum/100 || x < effectivityMinimum) {
+								allInputs[i].setText("");
+							}
+							if (allInputs[i].getText().length() >= 5 ) {
+								String text = allInputs[i].getText();
+								StringBuilder sb = new StringBuilder(text);
+								sb.deleteCharAt(text.length()-1);
+								x = Double.parseDouble(sb.toString());
+								allInputs[i].setText("" + x);
+							}
+							x*=100;
 							allSliders[i].setValue((int)x);
 						} else {
+							if (x > populationMaximum || x < populationMinimum) {
+								allInputs[i].setText("");
+							}
 							allSliders[i].setValue((int)x);
 						}
+
 					} catch (NumberFormatException nfe) {
 						allInputs[i].setText("");
 						allSliders[i].setValue(0);
@@ -186,7 +199,7 @@ class LanchesterPanel extends JPanel {
 	private static double currentH;
 	protected static int currentGRounded;
 	protected static int currentHRounded;
-	private static double tPlus;
+	protected static double tPlus;
 	private static String tPlusRounded;
 	private static String calculatedResult;
 
@@ -432,7 +445,7 @@ class LanchesterPanel extends JPanel {
 
 class GraphPanel extends JPanel {
 
-	public GraphPanel(ApplicationTime thread) {
+	public GraphPanel() {
 	}
 	public Dimension getPreferredSize() {
 		return new Dimension(Constants.GRAPH_WINDOW_WIDTH, Constants.GRAPH_WINDOW_HEIGHT);
@@ -451,6 +464,11 @@ class GraphPanel extends JPanel {
 	protected void paintComponent(Graphics g) {
 		super.paintComponent(g);
 
+		if(LanchesterPanel.tPlus > 10) {
+			g.drawString("Die Zeit bis zu einem Sieg ist höher als 11s!", width/2, padding);
+			g.drawString("Graph kann eventuell nicht bis zum Ende gezeichnet werden!", width/2, padding*2);
+		}
+
 		//Label coordinate system
 		g.drawString("Populationsstärke", padding*2, padding/2);
 		g.drawString("Zeit t", width-2*padding, height-padding/2);
@@ -460,6 +478,7 @@ class GraphPanel extends JPanel {
 		g.drawString("H(t)",padding*9,padding/2);
 		g.setColor(Color.BLACK);
 
+		//Draw coordinate system
 		int position = -pointdiameter/2;
 		int xLabel = 0;
 		while (position<=width) {

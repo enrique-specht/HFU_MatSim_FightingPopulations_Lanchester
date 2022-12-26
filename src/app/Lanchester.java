@@ -237,6 +237,7 @@ class LanchesterPanel extends JPanel {
 	private static double[] h0currentY;
 	private static double currentG;
 	private static double currentH;
+	private static double l;
 	protected static int currentGRounded;
 	protected static int currentHRounded;
 	protected static double tPlus;
@@ -321,7 +322,8 @@ class LanchesterPanel extends JPanel {
 
 	public static void testWhoWillWin() {
 		double k = Math.sqrt(Lanchester.s * Lanchester.r);
-		double l = (Lanchester.s * Math.pow(Lanchester.G0, 2)) - (Lanchester.r * Math.pow(Lanchester.H0, 2));
+		l = (Lanchester.s * Math.pow(Lanchester.G0, 2)) - (Lanchester.r * Math.pow(Lanchester.H0, 2));
+		System.out.println("L=" + l);
 		if(l > 0) {
 			tPlus = 1/k * aTanh((k*Lanchester.H0)/(Lanchester.s*Lanchester.G0));
 			tPlusRounded = String.format("%.2f",tPlus);
@@ -433,9 +435,10 @@ class LanchesterPanel extends JPanel {
 		g.drawString("r = " + Lanchester.r,textdistance,textdistance*5);
 		//calculated results
 		g.drawString("Berechnete Ergebnisse:", textdistance, textdistance*7);
-		g.drawString(calculatedResult,textdistance,textdistance*8);
-		g.drawString("Nach: " + tPlusRounded + "s",textdistance,textdistance*9);
-		g.drawString("Mit: " + winnerRestPopulation + " übrigen Person(en)",textdistance,textdistance*10);
+		g.drawString("L = " + l, textdistance, textdistance*8);
+		g.drawString(calculatedResult,textdistance,textdistance*9);
+		g.drawString("Nach: " + tPlusRounded + "s",textdistance,textdistance*10);
+		g.drawString("Mit: " + winnerRestPopulation + " übrigen Person(en)",textdistance,textdistance*11);
 
 
 		//draw G population
